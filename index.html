@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flash de Vendas | Dashboard Moderno</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+      :root {
+        --primary: #7c4dff;
+        --primary-dark: #651fff;
+        --secondary: #00bcd4;
+        --bg: #f4f7fe;
+        --card-bg: #ffffff;
+        --text-main: #2b3674;
+        --text-sub: #a3aed0;
+        --border-color: #e0e5f2;
+        --success: #05cd99;
+        --error: #ee5d50;
+        --warning: #ffb547;
+        --shadow: 0px 20px 50px rgba(112, 144, 176, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+        font-family: "DM Sans", "Segoe UI", Roboto, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg);
+        color: var(--text-main);
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
+        min-height: 100vh;
+      }
+
+      .main-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+        width: 100%;
+        max-width: 1200px;
+      }
+
+      @media (min-width: 992px) {
+        .main-wrapper {
+          grid-template-columns: 1.2fr 0.8fr;
+        }
+      }
+
+      .panel {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s ease;
+      }
+
+      h2 {
+        margin: 0 0 25px 0;
+        color: var(--text-main);
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .status-card {
+        background: linear-gradient(135deg, #f6f8fd 0%, #f0f4ff 100%);
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px dashed var(--primary);
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .status-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--primary);
+      }
+
+      .status-card label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--primary);
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+
+      #file-status {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-main);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .full-width {
+        grid-column: span 2;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-left: 4px;
+      }
+
+      input,
+      select {
+        padding: 12px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        font-size: 1rem;
+        color: var(--text-main);
+        background: #fff;
+        transition: all 0.2s ease;
+        outline: none;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.1);
+      }
+
+      input:disabled {
+        background-color: #f7f9ff;
+        border-color: #e0e5f2;
+        color: #a3aed0;
+        cursor: not-allowed;
+      }
+
+      .auto-loaded {
+        background-color: #f0fff4 !important;
+        border-color: var(--success) !important;
+        color: #065f46 !important;
+        font-weight: 600;
+      }
+
+      .btn {
+        padding: 16px;
+        border: none;
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .btn-gerar {
+        background: var(--primary);
+        color: white;
+        margin-top: 30px;
+        box-shadow: 0px 10px 20px rgba(124, 77, 255, 0.3);
+      }
+
+      .btn-gerar:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0px 15px 25px rgba(124, 77, 255, 0.4);
+      }
+
+      .btn-copiar {
+        background: var(--success);
+        color: white;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .btn-copiar:hover {
+        background: #04b386;
+        transform: translateY(-2px);
+      }
+
+      #resultado-content {
+        display: none;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .output-area {
+        background: #1b254b;
+        color: #fff;
+        padding: 25px;
+        border-radius: 18px;
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        overflow-y: auto;
+        flex-grow: 1;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .placeholder-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+        text-align: center;
+        color: var(--text-sub);
+      }
+
+      .placeholder-icon {
+        font-size: 4rem;
+        margin-bottom: 15px;
+        opacity: 0.3;
+      }
+
+      .error-msg {
+        background: #fff5f5;
+        color: var(--error);
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-align: center;
+        margin-top: 15px;
+        border: 1px solid #fed7d7;
+        display: none;
+      }
+
+      #loading-metas {
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-top: 4px;
+        display: none;
+      }
+
+      /* Estilização da barra de rolagem */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #aaa;
+      }
+    </style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="main-wrapper">
+      <!-- PAINEL DE ENTRADA -->
+      <div class="panel">
+        <h2>
+          <span
+            style="
+              background: var(--primary);
+              color: white;
+              padding: 8px;
+              border-radius: 10px;
+              font-size: 1.2rem;
+            "
+            >📝</span
+          >
+          Configuração do Flash
+        </h2>
+
+        <div class="status-card">
+          <label>📁 Status da Planilha</label>
+          <div id="file-status">Aguardando seleção de data...</div>
+          <div
+            style="font-size: 0.7rem; margin-top: 8px; color: var(--text-sub)"
+          >
+            Padrão: <strong>meta/MM_AAAA.xlsx</strong>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Calendário</label>
+            <input type="date" id="data" required />
+            <div id="loading-metas"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Período do Flash</label>
+            <select id="hora" required>
+              <option value="14:00">🕑 14:00h</option>
+              <option value="22:00">🕙 22:00h</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Realizado (R$)</label>
+            <input
+              type="text"
+              id="realizado"
+              class="masked-input"
+              placeholder="0,00"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Meta do Dia (R$)</label>
+            <input
+              type="text"
+              id="metaDia"
+              class="masked-input"
+              placeholder="Automático"
+              disabled
+            />
+          </div>
+
+          <div class="form-group">
+            <label>TKM Atual (R$)</label>
+            <input
+              type="text"
+              id="tkmAtualInput"
+              placeholder="Calculado"
+              disabled
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Qtd. Clientes</label>
+            <input
+              type="number"
+              id="qtdClientes"
+              placeholder="Ex: 85"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>P.A Realizado</label>
+            <input
+              type="number"
+              step="0.01"
+              id="pa"
+              placeholder="Ex: 2.57"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Prateleira Infinita</label>
+            <input type="number" id="pi" placeholder="0" required />
+          </div>
+
+          <div class="form-group">
+            <label>CRM</label>
+            <input type="number" id="crm" placeholder="0" required />
+          </div>
+
+          <div class="form-group">
+            <label>Qtd. Pix</label>
+            <input type="number" id="pix" placeholder="0" required />
+          </div>
+
+          <div class="form-group">
+            <label>Qtd. Débito</label>
+            <input type="number" id="debito" placeholder="0" required />
+          </div>
+
+          <div class="form-group full-width">
+            <label>Venda Atual - EVER (R$)</label>
+            <input
+              type="text"
+              id="ever"
+              class="masked-input"
+              placeholder="0,00"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Meta Dia EVER (R$)</label>
+            <input
+              type="text"
+              id="metaEver"
+              class="masked-input"
+              placeholder="Automático"
+              disabled
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Meta Colaborador (R$)</label>
+            <input type="number" id="metaColab" value="180" required />
+          </div>
+        </div>
+
+        <div class="error-msg" id="errorMsg">
+          ⚠️ Ops! Preencha todos os campos para gerar o flash.
+        </div>
+
+        <button class="btn btn-gerar" onclick="gerarFlash()">
+          Gerar Relatório ⚡
+        </button>
+      </div>
+
+      <!-- PAINEL DE RESULTADO -->
+      <div class="panel">
+        <h2>
+          <span
+            style="
+              background: var(--success);
+              color: white;
+              padding: 8px;
+              border-radius: 10px;
+              font-size: 1.2rem;
+            "
+            >✨</span
+          >
+          Flash Gerado
+        </h2>
+
+        <div id="placeholder" class="placeholder-container">
+          <div class="placeholder-icon">📊</div>
+          <p>Os dados formatados aparecerão aqui após a geração.</p>
+        </div>
+
+        <div id="resultado-content">
+          <div id="texto-final" class="output-area"></div>
+          <button class="btn btn-copiar" id="btnCopiar" onclick="copiarTexto()">
+            Copiar para o WhatsApp 📋
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let dadosPlanilhaGlobal = [];
+      let metaTkmGlobal = 0;
+      let mesAnoCarregado = "";
+
+      window.onload = function () {
+        const agora = new Date();
+        const horas = agora.getHours();
+        const selectHora = document.getElementById("hora");
+        if (horas < 14) selectHora.value = "14:00";
+        else selectHora.value = "22:00";
+      };
+
+      document.getElementById("data").addEventListener("change", function () {
+        const dataSelecionada = this.value;
+        if (!dataSelecionada) return;
+        const [ano, mes, dia] = dataSelecionada.split("-");
+        const chaveMesAno = `${mes}_${ano}`;
+        if (chaveMesAno !== mesAnoCarregado)
+          carregarPlanilhaPorData(mes, ano, dia, mes, ano);
+        else preencherMetas();
+      });
+
+      document
+        .getElementById("qtdClientes")
+        .addEventListener("input", calcularTkmAtual);
+      document
+        .getElementById("realizado")
+        .addEventListener("input", calcularTkmAtual);
+
+      function calcularTkmAtual() {
+        const realizado = obterValorFloat("realizado");
+        const qtdClientes = parseInt(
+          document.getElementById("qtdClientes").value,
+        );
+        const inputTkmAtual = document.getElementById("tkmAtualInput");
+        if (realizado > 0 && qtdClientes > 0) {
+          const tkmCalculado = realizado / qtdClientes;
+          inputTkmAtual.value = tkmCalculado.toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+          inputTkmAtual.classList.add("auto-loaded");
+        } else {
+          inputTkmAtual.value = "";
+          inputTkmAtual.classList.remove("auto-loaded");
+        }
+      }
+
+      async function carregarPlanilhaPorData(
+        mes,
+        ano,
+        dia,
+        mesOriginal,
+        anoOriginal,
+      ) {
+        const statusSpan = document.getElementById("file-status");
+        const msgSpan = document.getElementById("loading-metas");
+        const nomeArquivo = `meta/${mes}_${ano}.xlsx`;
+
+        statusSpan.innerHTML = `<span style="color: var(--primary)">⏳ Carregando arquivo de ${mes}/${ano}...</span>`;
+        msgSpan.style.display = "none";
+
+        try {
+          const response = await fetch(nomeArquivo);
+          if (!response.ok) throw new Error("Arquivo não encontrado");
+          const arrayBuffer = await response.arrayBuffer();
+          const data = new Uint8Array(arrayBuffer);
+          const workbook = XLSX.read(data, { type: "array" });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          dadosPlanilhaGlobal = rows;
+          mesAnoCarregado = `${mesOriginal}_${anoOriginal}`;
+
+          metaTkmGlobal = 0;
+          for (let i = 0; i < Math.min(5, rows.length); i++) {
+            const row = rows[i];
+            if (!row) continue;
+            for (let c = 0; c < row.length; c++) {
+              const celula = String(row[c] || "")
+                .trim()
+                .toUpperCase();
+              if (celula === "TKM")
+                metaTkmGlobal =
+                  parseFloat(String(row[c + 1]).replace(",", ".")) || 0;
+            }
+          }
+
+          statusSpan.innerHTML = `<span style="color: var(--success)">✅ Planilha "${nomeArquivo}" pronta!</span>`;
+          preencherMetas();
+        } catch (error) {
+          statusSpan.innerHTML = `<span style="color: var(--error)">❌ Erro: Planilha "${nomeArquivo}" não encontrada.</span>`;
+          dadosPlanilhaGlobal = [];
+          mesAnoCarregado = "";
+          resetMetasFields(false);
+        }
+      }
+
+      function resetMetasFields(disabled) {
+        const fields = ["metaDia", "metaEver"];
+        fields.forEach((id) => {
+          const input = document.getElementById(id);
+          if (!disabled) input.value = "";
+          input.disabled = disabled;
+          if (disabled) input.classList.add("auto-loaded");
+          else input.classList.remove("auto-loaded");
+        });
+      }
+
+      function preencherMetas() {
+        const dataSelecionada = document.getElementById("data").value;
+        const msgSpan = document.getElementById("loading-metas");
+        if (!dataSelecionada || dadosPlanilhaGlobal.length === 0) return;
+
+        const [ano, mes, dia] = dataSelecionada.split("-");
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+        let encontrouData = false;
+
+        for (let i = 0; i < dadosPlanilhaGlobal.length; i++) {
+          const row = dadosPlanilhaGlobal[i];
+          if (row && String(row[0] || "").includes(dataFormatada)) {
+            encontrouData = true;
+            document.getElementById("metaDia").value = formatarMoedaParaInput(
+              converterValorExcel(row[1]),
+            );
+            document.getElementById("metaEver").value = formatarMoedaParaInput(
+              converterValorExcel(row[2]),
+            );
+            resetMetasFields(true);
+            msgSpan.style.display = "block";
+            msgSpan.innerHTML = `<span style="color: var(--success)">✨ Metas aplicadas com sucesso!</span>`;
+            break;
+          }
+        }
+
+        if (!encontrouData) {
+          msgSpan.style.display = "block";
+          msgSpan.innerHTML = `<span style="color: var(--error)">⚠️ Dia ${dataFormatada} não consta na planilha.</span>`;
+          resetMetasFields(false);
+        }
+      }
+
+      function converterValorExcel(valor) {
+        if (valor === undefined || valor === null) return 0;
+        if (typeof valor === "number") return valor;
+        return (
+          parseFloat(
+            String(valor).trim().replace(/\./g, "").replace(",", "."),
+          ) || 0
+        );
+      }
+
+      function formatarMoedaParaInput(valor) {
+        return valor.toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
+
+      document.querySelectorAll(".masked-input").forEach((input) => {
+        input.addEventListener("input", function (e) {
+          if (this.disabled) return;
+          let value = e.target.value.replace(/\D/g, "");
+          if (value === "") {
+            e.target.value = "";
+            return;
+          }
+          e.target.value = (parseFloat(value) / 100).toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+        });
+      });
+
+      function obterValorFloat(id) {
+        const val = document.getElementById(id).value;
+        return val ? parseFloat(val.replace(/\./g, "").replace(",", ".")) : 0;
+      }
+
+      function formatarMoeda(valor) {
+        return valor.toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
+
+      function gerarFlash() {
+        const dataInput = document.getElementById("data").value;
+        const hora = document.getElementById("hora").value;
+        const qtdClientes = parseInt(
+          document.getElementById("qtdClientes").value,
+        );
+        const pa = parseFloat(document.getElementById("pa").value) || 0;
+        const pi = document.getElementById("pi").value;
+        const crm = document.getElementById("crm").value;
+        const pix = parseInt(document.getElementById("pix").value) || 0;
+        const debito = parseInt(document.getElementById("debito").value) || 0;
+        const metaColab = document.getElementById("metaColab").value;
+        const realizado = obterValorFloat("realizado");
+        const metaDia = obterValorFloat("metaDia");
+        const ever = obterValorFloat("ever");
+        const metaEver = obterValorFloat("metaEver");
+
+        if (
+          !dataInput ||
+          !pi ||
+          !crm ||
+          !pix ||
+          !debito ||
+          !ever ||
+          !metaEver ||
+          !realizado ||
+          !metaDia ||
+          isNaN(qtdClientes) ||
+          pa === 0
+        ) {
+          document.getElementById("errorMsg").style.display = "block";
+          return;
+        }
+        document.getElementById("errorMsg").style.display = "none";
+
+        const [ano, mes, dia] = dataInput.split("-");
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+        const tkmAtualCalculado = qtdClientes > 0 ? realizado / qtdClientes : 0;
+        const atingimentoTotal = ((realizado / metaDia) * 100).toFixed(2);
+        const totalPagamentos = pix + debito;
+        const percPix =
+          totalPagamentos > 0
+            ? ((pix / totalPagamentos) * 100).toFixed(2)
+            : "0,00";
+        const atingimentoEver = ((ever / metaEver) * 100).toFixed(2);
+        const horaAtualizacao = hora === "14:00" ? "14h" : "22h";
+
+        const mensagem = `📊✨ FLASH DE VENDAS E INDICADORES | *14:00* e *22:00h*
+
+📆 ${dataFormatada}
+🕙 Atualizado às ${horaAtualizacao}
+
+━━━━━━━━━━━━━━━━
+
+💰 VENDAS
+
+🎯 Meta do Dia: R$ ${formatarMoeda(metaDia)}
+✅ Realizado: R$ ${formatarMoeda(realizado)}
+📊 Atingimento: ${atingimentoTotal.replace(".", ",")}%
+
+🧾 Meta TKM: R$ ${metaTkmGlobal.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+📈 TKM Atual: R$ ${formatarMoeda(tkmAtualCalculado)}
+🛍️ P.A Realizado: ${pa.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+🛒 Prateleira Infinita: ${pi}
+
+💳 PAGAMENTOS 
+⚡ Pix: ${pix}
+💸 Pix + Débito: ${totalPagamentos}
+📊 Pix: ${percPix.replace(".", ",")}%
+
+━━━━━━━━━━━━━━━━
+🟣 EVER – ATENÇÃO TOTAL
+
+🎯 Meta do Dia: R$ ${formatarMoeda(metaEver)}
+💜 Venda Atual: R$ ${formatarMoeda(ever)}
+✅Atingimento: ${atingimentoEver.replace(".", ",")}%
+
+
+👩‍💼👨‍💼 Meta por Colaborador: R$${metaColab}
+
+⚡ Foco em oferta ativa, abordagem consultiva e reforço no caixa.
+━━━━━━━━━━━━━
+
+📲 CRM & CANAIS
+🔁 CRM: ${crm}
+
+🎯 DIRECIONAMENTO FECHAMENTO DA LOJA 
+
+👊🏼Puxar a frente de toda a loja e repor clip strips 
+🚀 FOCO | ENGAJAMENTO | EXECUÇÃO | RESULTADO
+
+📌 O ritmo que colocamos hoje define o fechamento do mês.`;
+
+        document.getElementById("placeholder").style.display = "none";
+        const resContent = document.getElementById("resultado-content");
+        document.getElementById("texto-final").innerText = mensagem;
+        resContent.style.display = "flex";
+      }
+
+      function copiarTexto() {
+        const texto = document.getElementById("texto-final").innerText;
+        navigator.clipboard.writeText(texto).then(() => {
+          const btn = document.getElementById("btnCopiar");
+          btn.innerHTML = "Copiado com Sucesso! ✅";
+          btn.style.background = "#05cd99";
+          setTimeout(() => {
+            btn.innerHTML = "Copiar para o WhatsApp 📋";
+            btn.style.background = "var(--success)";
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>
