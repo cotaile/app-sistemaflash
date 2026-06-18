@@ -1205,11 +1205,13 @@
         }
         .chart-container {
           break-inside: avoid;
-          height: 200px !important;
+          break-after: page;
+          height: 280px !important;
           padding: 10px !important;
           margin-bottom: 8px !important;
         }
         .metas-diarias-section {
+          break-before: page;
           padding: 10px 14px !important;
           margin-top: 8px !important;
         }
@@ -1269,9 +1271,7 @@
         .dash-card,
         .orcado-card,
         .indicadores-bloco,
-        .metas-diarias-section,
-        .orcado-vendido-section,
-        .chart-container {
+        .orcado-vendido-section {
           break-inside: avoid;
           box-shadow: none !important;
         }
@@ -1521,7 +1521,7 @@
         </div>
         <div class="dashboard-grid">
           <div class="dash-card">
-            <h3>Vendas Totais (Mês)</h3>
+            <h3 id="titulo-card-total">Vendas Totais (Mês)</h3>
             <div
               style="
                 display: flex;
@@ -1536,7 +1536,7 @@
                     color: var(--text-sub);
                     display: block;
                   "
-                  >Meta Estipulada</span
+                  >Meta do Mês</span
                 ><strong id="dash-meta-total" style="font-size: 1.1rem"
                   >R$ 0,00</strong
                 >
@@ -1548,7 +1548,7 @@
                     color: var(--text-sub);
                     display: block;
                   "
-                  >Vendido</span
+                  >Vendido no Período</span
                 ><strong
                   id="dash-vendido-total"
                   style="font-size: 1.4rem; color: var(--primary)"
@@ -1568,7 +1568,7 @@
             </div>
           </div>
           <div class="dash-card">
-            <h3>Vendas EVER (Mês)</h3>
+            <h3 id="titulo-card-ever">Vendas EVER (Mês)</h3>
             <div
               style="
                 display: flex;
@@ -1583,7 +1583,7 @@
                     color: var(--text-sub);
                     display: block;
                   "
-                  >Meta Estipulada</span
+                  >Meta do Mês</span
                 ><strong id="dash-meta-ever" style="font-size: 1.1rem"
                   >R$ 0,00</strong
                 >
@@ -1595,7 +1595,7 @@
                     color: var(--text-sub);
                     display: block;
                   "
-                  >Vendido</span
+                  >Vendido no Período</span
                 ><strong
                   id="dash-vendido-ever"
                   style="font-size: 1.4rem; color: var(--secondary)"
@@ -1875,7 +1875,6 @@
         document.getElementById("notifIcon").textContent = icone;
         document.getElementById("modalNotificacao").style.display = "block";
       }
-
       function fecharModalNotificacao() {
         document.getElementById("modalNotificacao").style.display = "none";
       }
@@ -1887,7 +1886,6 @@
         document.getElementById("loginError").textContent = "";
         setTimeout(() => document.getElementById("loginUser").focus(), 100);
       }
-
       function fecharModalLogin() {
         document.getElementById("modalLogin").style.display = "none";
       }
@@ -1901,7 +1899,7 @@
           abrirModalPlanilha();
         } else {
           document.getElementById("loginError").textContent =
-            "❌ Credenciais inválidas. Tente novamente.";
+            "❌ Credenciais inválidas.";
         }
       }
 
@@ -2060,7 +2058,7 @@
             calcularTkmAtual();
             document.getElementById("loading-metas").style.display = "block";
             document.getElementById("loading-metas").innerHTML =
-              `<span style="color: var(--secondary)">📥 Dados carregados do banco!</span>`;
+              `<span style="color: var(--secondary)">📥 Dados carregados!</span>`;
           }
         } catch (e) {}
       }
@@ -2093,7 +2091,7 @@
             resetMetasFields(false);
             mostrarNotificacao(
               "Sem Metas",
-              `Nenhuma meta encontrada para ${mesesMap[mes] || mes} de ${ano}. Carregue uma planilha.`,
+              `Nenhuma meta encontrada para ${mesesMap[mes] || mes} de ${ano}.`,
               "📭",
             );
             return;
@@ -2120,11 +2118,7 @@
           verificarPeriodoBanco();
           preencherMetas();
         } catch (e) {
-          mostrarNotificacao(
-            "Erro",
-            "Erro ao buscar metas no banco de dados.",
-            "❌",
-          );
+          mostrarNotificacao("Erro", "Erro ao buscar metas.", "❌");
           dadosPlanilhaGlobal = [];
           resetMetasFields(false);
         }
@@ -2313,7 +2307,6 @@
         document.getElementById("uploadStatus").className = "upload-status";
         document.getElementById("fileInputPlanilha").value = "";
       }
-
       function fecharModalPlanilha() {
         document.getElementById("modalPlanilha").style.display = "none";
       }
@@ -2338,7 +2331,7 @@
 
       async function enviarPlanilha() {
         if (!arquivoPlanilhaSelecionado) {
-          mostrarNotificacao("Aviso", "Selecione um arquivo primeiro!", "📁");
+          mostrarNotificacao("Aviso", "Selecione um arquivo!", "📁");
           return;
         }
         const st = document.getElementById("uploadStatus"),
@@ -2432,7 +2425,7 @@
           verificarPeriodoBanco();
           mostrarNotificacao(
             "Sucesso",
-            `${salvas} dias foram salvos no banco com sucesso!`,
+            `${salvas} dias salvos com sucesso!`,
             "✅",
           );
           setTimeout(fecharModalPlanilha, 1500);
@@ -2444,10 +2437,10 @@
       }
 
       function exportarPDF() {
-        const abaTotal = document.getElementById("aba-metas-total");
-        const abaEver = document.getElementById("aba-metas-ever");
-        const wasTotalActive = abaTotal.classList.contains("ativo");
-        const wasEverActive = abaEver.classList.contains("ativo");
+        const abaTotal = document.getElementById("aba-metas-total"),
+          abaEver = document.getElementById("aba-metas-ever");
+        const wasTotalActive = abaTotal.classList.contains("ativo"),
+          wasEverActive = abaEver.classList.contains("ativo");
         abaTotal.classList.add("ativo");
         abaEver.classList.add("ativo");
         document.body.classList.add("printing-pdf");
@@ -2537,7 +2530,8 @@
             anoSel = a;
           }
           if (isNaN(diaSel) || diaSel < 1) diaSel = 1;
-          const { primeiraData, ultimaData } = encontrarDatasPlanilha();
+
+          const { primeiraData } = encontrarDatasPlanilha();
           let pDia = 1,
             pMes = mesSel,
             pAno = anoSel;
@@ -2546,50 +2540,53 @@
             pMes = primeiraData.mes;
             pAno = primeiraData.ano;
           }
-          let tMeta = 0,
-            tMetaEver = 0,
-            orcado = 0,
-            orcadoEver = 0,
+
+          let metaTotalMes = 0,
+            metaEverTotalMes = 0;
+          let orcadoPeriodo = 0,
+            orcadoEverPeriodo = 0,
             diasPer = 0;
+
           for (const row of dadosPlanilhaGlobal) {
             if (row && String(row[0] || "").includes("/")) {
               const mv = converterValorExcel(row[1]),
                 mev = converterValorExcel(row[2]);
-              tMeta += mv;
-              tMetaEver += mev;
+              metaTotalMes += mv;
+              metaEverTotalMes += mev;
               const m = String(row[0])
                 .trim()
                 .match(/(\d{2})\/(\d{2})\/(\d{4})/);
               if (m) {
                 const dp = parseInt(m[1]);
                 if (dp >= pDia && dp <= diaSel) {
-                  orcado += mv;
-                  orcadoEver += mev;
+                  orcadoPeriodo += mv;
+                  orcadoEverPeriodo += mev;
                   diasPer++;
                 }
               }
             }
           }
           if (diasPer === 0) diasPer = 1;
-          const mediaIdeal = orcado / diasPer,
-            mediaIdealEver = orcadoEver / diasPer;
-          document.getElementById("dash-meta-total").innerText =
-            formatarMoeda(tMeta);
-          document.getElementById("dash-meta-ever").innerText =
-            formatarMoeda(tMetaEver);
-          document.getElementById("periodo-texto-unico").innerText =
-            `${pDia.toString().padStart(2, "0")}/${pMes} até ${diaSel.toString().padStart(2, "0")}/${mesSel}`;
-          const udi = ultimaData
-            ? ultimaData.dia
-            : new Date(parseInt(anoSel), parseInt(mesSel), 0).getDate();
-          const di = `${pAno}-${pMes}-${pDia.toString().padStart(2, "0")}`,
-            df = `${anoSel}-${mesSel}-${udi.toString().padStart(2, "0")}`;
+
+          const mediaIdeal = orcadoPeriodo / diasPer;
+          const mediaIdealEver = orcadoEverPeriodo / diasPer;
+
+          const nomeMesAno = `${mesesMap[mesSel] || mesSel} de ${anoSel}`;
+          document.getElementById("titulo-card-total").textContent =
+            `Vendas Totais (${nomeMesAno})`;
+          document.getElementById("titulo-card-ever").textContent =
+            `Vendas EVER (${nomeMesAno})`;
+
+          const dataInicio = `${pAno}-${pMes}-${pDia.toString().padStart(2, "0")}`;
+          const dataFim = `${anoSel}-${mesSel}-${diaSel.toString().padStart(2, "0")}`;
+
           const qs = await db
             .collection("vendas")
-            .where("dataCompleta", ">=", di)
-            .where("dataCompleta", "<=", df)
+            .where("dataCompleta", ">=", dataInicio)
+            .where("dataCompleta", "<=", dataFim)
             .orderBy("dataCompleta")
             .get();
+
           const labels = [],
             dV = [],
             dVE = [],
@@ -2597,9 +2594,7 @@
             dOE = [],
             dT = [],
             dE = [];
-          let tvf = 0,
-            tvef = 0,
-            vp = 0,
+          let vp = 0,
             vep = 0,
             sCli = 0,
             sPa = 0,
@@ -2608,6 +2603,10 @@
             sDeb = 0;
 
           if (qs.empty) {
+            document.getElementById("dash-meta-total").innerText =
+              formatarMoeda(metaTotalMes);
+            document.getElementById("dash-meta-ever").innerText =
+              formatarMoeda(metaEverTotalMes);
             document.getElementById("dash-vendido-total").innerText =
               formatarMoeda(0);
             document.getElementById("dash-vendido-ever").innerText =
@@ -2623,21 +2622,21 @@
             document.getElementById("texto-progresso-ever").innerText =
               "0% Atingido";
             document.getElementById("orcado-total").innerText =
-              formatarMoeda(orcado);
+              formatarMoeda(orcadoPeriodo);
             document.getElementById("vendido-total-bar").innerText =
               formatarMoeda(0);
             document.getElementById("budget-bar-total").style.width = "0%";
             document.getElementById("budget-bar-total").style.background =
               "#ee5d50";
             document.getElementById("orcado-ever").innerText =
-              formatarMoeda(orcadoEver);
+              formatarMoeda(orcadoEverPeriodo);
             document.getElementById("vendido-ever-bar").innerText =
               formatarMoeda(0);
             document.getElementById("budget-bar-ever").style.width = "0%";
             document.getElementById("budget-bar-ever").style.background =
               "#ee5d50";
-            atualizarGapInfo("total", 0, orcado);
-            atualizarGapInfo("ever", 0, orcadoEver);
+            atualizarGapInfo("total", 0, orcadoPeriodo);
+            atualizarGapInfo("ever", 0, orcadoEverPeriodo);
             atualizarPercentualAtingimento("total", 0);
             atualizarPercentualAtingimento("ever", 0);
             renderizarStatusMetas(
@@ -2652,47 +2651,38 @@
             );
             renderizarGrafico([], [], [], [], [], [], []);
             document.getElementById("indicadores-container").innerHTML =
-              "<p style='grid-column:1/-1;text-align:center;color:var(--text-sub)'>Indicadores indisponíveis.</p>";
+              "<p style='grid-column:1/-1;text-align:center;color:var(--text-sub)'>Sem dados de venda no período.</p>";
+            document.getElementById("periodo-texto-unico").innerText =
+              `${pDia.toString().padStart(2, "0")}/${pMes} até ${diaSel.toString().padStart(2, "0")}/${mesSel}`;
             return;
           }
 
           qs.forEach((doc) => {
             const v = doc.data(),
               data = doc.id;
-            tvf += v.realizado || 0;
-            tvef += v.ever || 0;
             const [ad, md, dd] = data.split("-");
-            const ddn = parseInt(dd),
-              mdn = parseInt(md);
-            let dp2 = false;
-            if (
-              mdn == parseInt(pMes) &&
-              ad == pAno &&
-              ddn >= pDia &&
-              ddn <= diaSel
-            )
-              dp2 = true;
-            if (dp2) {
-              vp += v.realizado || 0;
-              vep += v.ever || 0;
-              dT.push({
-                dia: ddn,
-                bateu: (v.realizado || 0) >= (v.metaDia || 0),
-                meta: v.metaDia || 0,
-                vendido: v.realizado || 0,
-              });
-              dE.push({
-                dia: ddn,
-                bateu: (v.ever || 0) >= (v.metaEver || 0),
-                meta: v.metaEver || 0,
-                vendido: v.ever || 0,
-              });
-            }
+            const ddn = parseInt(dd);
+
+            vp += v.realizado || 0;
+            vep += v.ever || 0;
+            dT.push({
+              dia: ddn,
+              bateu: (v.realizado || 0) >= (v.metaDia || 0),
+              meta: v.metaDia || 0,
+              vendido: v.realizado || 0,
+            });
+            dE.push({
+              dia: ddn,
+              bateu: (v.ever || 0) >= (v.metaEver || 0),
+              meta: v.metaEver || 0,
+              vendido: v.ever || 0,
+            });
             sCli += v.qtdClientes || 0;
             sPa += v.pa || 0;
             sPi += v.pi || 0;
             sPix += v.pix || 0;
             sDeb += v.debito || 0;
+
             labels.push(`${dd}/${md}`);
             dV.push(v.realizado || 0);
             dVE.push(v.ever || 0);
@@ -2712,12 +2702,20 @@
             "status-resumo-ever",
             dE,
           );
+
+          document.getElementById("dash-meta-total").innerText =
+            formatarMoeda(metaTotalMes);
+          document.getElementById("dash-meta-ever").innerText =
+            formatarMoeda(metaEverTotalMes);
           document.getElementById("dash-vendido-total").innerText =
-            formatarMoeda(tvf);
+            formatarMoeda(vp);
           document.getElementById("dash-vendido-ever").innerText =
-            formatarMoeda(tvef);
-          const pctT = tMeta > 0 ? (tvf / tMeta) * 100 : 0,
-            pctE = tMetaEver > 0 ? (tvef / tMetaEver) * 100 : 0;
+            formatarMoeda(vep);
+
+          const pctT = metaTotalMes > 0 ? (vp / metaTotalMes) * 100 : 0;
+          const pctE =
+            metaEverTotalMes > 0 ? (vep / metaEverTotalMes) * 100 : 0;
+
           const pt = document.getElementById("progresso-total");
           pt.style.width = Math.min(pctT, 100) + "%";
           pt.style.background = getProgressColor(pctT);
@@ -2728,26 +2726,32 @@
           pe.style.background = getProgressColor(pctE);
           document.getElementById("texto-progresso-ever").innerText =
             pctE.toFixed(1).replace(".", ",") + "% Atingido";
-          const poT = orcado > 0 ? (vp / orcado) * 100 : 0,
-            poE = orcadoEver > 0 ? (vep / orcadoEver) * 100 : 0;
+
+          const poT = orcadoPeriodo > 0 ? (vp / orcadoPeriodo) * 100 : 0;
+          const poE =
+            orcadoEverPeriodo > 0 ? (vep / orcadoEverPeriodo) * 100 : 0;
           document.getElementById("orcado-total").innerText =
-            formatarMoeda(orcado);
+            formatarMoeda(orcadoPeriodo);
           document.getElementById("vendido-total-bar").innerText =
             formatarMoeda(vp);
           const bbt = document.getElementById("budget-bar-total");
           bbt.style.width = Math.min(poT, 100) + "%";
           bbt.style.background = getProgressColor(poT);
           document.getElementById("orcado-ever").innerText =
-            formatarMoeda(orcadoEver);
+            formatarMoeda(orcadoEverPeriodo);
           document.getElementById("vendido-ever-bar").innerText =
             formatarMoeda(vep);
           const bbe = document.getElementById("budget-bar-ever");
           bbe.style.width = Math.min(poE, 100) + "%";
           bbe.style.background = getProgressColor(poE);
-          atualizarGapInfo("total", vp, orcado);
-          atualizarGapInfo("ever", vep, orcadoEver);
+
+          atualizarGapInfo("total", vp, orcadoPeriodo);
+          atualizarGapInfo("ever", vep, orcadoEverPeriodo);
           atualizarPercentualAtingimento("total", poT);
           atualizarPercentualAtingimento("ever", poE);
+
+          document.getElementById("periodo-texto-unico").innerText =
+            `${pDia.toString().padStart(2, "0")}/${pMes} até ${diaSel.toString().padStart(2, "0")}/${mesSel}`;
 
           const tkmMedio = sCli > 0 ? vp / sCli : 0;
           const aCli = Math.round(sCli / diasPer);
