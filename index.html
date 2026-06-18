@@ -1172,10 +1172,7 @@
           padding: 8px 10px !important;
           gap: 6px !important;
           margin-bottom: 10px !important;
-          grid-template-columns: repeat(
-            auto-fit,
-            minmax(100px, 1fr)
-          ) !important;
+          grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
         }
         h3 {
           font-size: 0.7rem !important;
@@ -1241,10 +1238,7 @@
           font-size: 0.55rem !important;
         }
         .meta-status-list {
-          grid-template-columns: repeat(
-            auto-fill,
-            minmax(55px, 1fr)
-          ) !important;
+          grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)) !important;
           gap: 4px !important;
         }
         .day-status {
@@ -2189,8 +2183,12 @@
           q = parseInt(document.getElementById("qtdClientes").value);
         const inp = document.getElementById("tkmAtualInput");
         if (r > 0 && q > 0) {
-          inp.value = (r / q).toLocaleString("pt-BR", {
+          const tkmCalculado = r / q;
+          // Arredondar para CIMA com 2 casas decimais
+          const tkmArredondado = Math.ceil(tkmCalculado * 100) / 100;
+          inp.value = tkmArredondado.toLocaleString("pt-BR", {
             minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
           });
           inp.classList.add("auto-loaded");
         } else {
